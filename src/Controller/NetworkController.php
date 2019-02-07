@@ -4,9 +4,8 @@ namespace GitList\Controller;
 
 use GitList\Git\Repository;
 use Gitter\Model\Commit\Commit;
-use Silex\Application;
 use Silex\ControllerProviderInterface;
-use Symfony\Component\HttpFoundation\Request;
+use Silex\Application;
 use GitList\Exception\NoRepositoryException;
 
 class NetworkController implements ControllerProviderInterface
@@ -16,9 +15,10 @@ class NetworkController implements ControllerProviderInterface
         $route = $app['controllers_factory'];
 
         try {
-            $route->get('{repo}/network/{commitishPath}/{page}.json',
+        $route->get(
+            '{repo}/network/{commitishPath}/{page}.json',
                 function ($repo, $commitishPath, $page) use ($app) {
-                    /** @var $repository Repository */
+                /** @var Repository $repository  */
                     $repository = $app['git']->getRepositoryFromName($app['git.repos'], $repo);
 
                     if ($commitishPath === null) {
@@ -35,7 +35,7 @@ class NetworkController implements ControllerProviderInterface
                             'commit',
                             array(
                                 'repo' => $repo,
-                                'commit' => $commit->getHash()
+                            'commit' => $commit->getHash(),
                             )
                         );
 
@@ -48,8 +48,8 @@ class NetworkController implements ControllerProviderInterface
                             'author' => array(
                                 'name' => $commit->getAuthor()->getName(),
                                 'email' => $commit->getAuthor()->getEmail(),
-                                'image' => $app->getAvatar($commit->getAuthor()->getEmail(), 40)
-                            )
+                            'image' => $app->getAvatar($commit->getAuthor()->getEmail(), 40),
+                        ),
                         );
                     }
 
@@ -61,7 +61,7 @@ class NetworkController implements ControllerProviderInterface
                             array(
                                 'repo' => $repo,
                                 'commitishPath' => $commitishPath,
-                                'page' => $pager['next']
+                            'page' => $pager['next'],
                             )
                         );
                     }
@@ -74,18 +74,21 @@ class NetworkController implements ControllerProviderInterface
                                 'commitishPath' => $commitishPath,
                                 'nextPage' => null,
                                 'start' => null,
-                                'commits' => $jsonFormattedCommits
-                                ), 200
+                            'commits' => $jsonFormattedCommits,
+                            ),
+                        200
                             );
                     }
 
-                    return $app->json( array(
+                return $app->json(
+                    array(
                         'repo' => $repo,
                         'commitishPath' => $commitishPath,
                         'nextPage' => $nextPageUrl,
                         'start' => $commits[0]->getHash(),
-                        'commits' => $jsonFormattedCommits
-                        ), 200
+                    'commits' => $jsonFormattedCommits,
+                    ),
+                    200
                     );
                 }
             )->assert('repo', $app['util.routing']->getRepositoryRegex())

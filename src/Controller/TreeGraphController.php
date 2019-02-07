@@ -2,9 +2,8 @@
 
 namespace GitList\Controller;
 
-use Silex\Application;
 use Silex\ControllerProviderInterface;
-use Symfony\Component\HttpFoundation\Request;
+use Silex\Application;
 use GitList\Exception\NoRepositoryException;
 
 class TreeGraphController implements ControllerProviderInterface
@@ -30,19 +29,19 @@ class TreeGraphController implements ControllerProviderInterface
                         if (preg_match("/^(.+?)(\s(B\[(.*?)\])? C\[(.+?)\] D\[(.+?)\] A\[(.+?)\] E\[(.+?)\] H\[(.+?)\] S\[(.+?)\])?$/", $row, $output)) {
                             if (!isset($output[4])) {
                                 $graphItems[] = array(
-                                    "relation"=>$output[1]
+                                'relation' => $output[1],
                                 );
                                 continue;
                             }
                             $graphItems[] = array(
-                                "relation"=>$output[1],
-                                "branch"=>$output[4],
-                                "rev"=>$output[5],
-                                "date"=>$output[6],
-                                "author"=>$output[7],
-                                "author_email"=>$output[8],
-                                "short_rev"=>$output[9],
-                                "subject"=>preg_replace('/(^|\s)(#[[:xdigit:]]+)(\s|$)/', '$1<a href="$2">$2</a>$3', $output[10])
+                            'relation' => $output[1],
+                            'branch' => $output[4],
+                            'rev' => $output[5],
+                            'date' => $output[6],
+                            'author' => $output[7],
+                            'author_email' => $output[8],
+                            'short_rev' => $output[9],
+                            'subject' => preg_replace('/(^|\s)(#[[:xdigit:]]+)(\s|$)/', '$1<a href="$2">$2</a>$3', $output[10]),
                             );
                         }
                     }

@@ -2,10 +2,10 @@
 
 namespace GitList\Controller;
 
-use Silex\Application;
 use Silex\ControllerProviderInterface;
-use Symfony\Component\HttpFoundation\Response;
+use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use GitList\Exception\NoRepositoryException;
 
 class MainController implements ControllerProviderInterface
@@ -15,37 +15,36 @@ class MainController implements ControllerProviderInterface
         $route = $app['controllers_factory'];
 
         try {
-            $route->get('/', function() use ($app) {
+        $route->get('/', function () use ($app) {
                 $repositories = $app['git']->getRepositories($app['git.repos']);
 
                 return $app['twig']->render('index.twig', array(
-                    'repositories'   => $repositories,
+                'repositories' => $repositories,
                 ));
             })->bind('homepage');
 
-
-            $route->get('/refresh', function(Request $request) use ($app ) {
-                # Go back to calling page
+        $route->get('/refresh', function (Request $request) use ($app) {
+            // Go back to calling page
                 return $app->redirect($request->headers->get('Referer'));
             })->bind('refresh');
 
-            $route->get('{repo}/stats/{branch}', function($repo, $branch) use ($app) {
+        $route->get('{repo}/stats/{branch}', function ($repo, $branch) use ($app) {
                 $repository = $app['git']->getRepositoryFromName($app['git.repos'], $repo);
 
                 if ($branch === null) {
                     $branch = $repository->getHead();
                 }
 
-                $stats = $repository->getStatistics($branch);
+            $stats = $repository->getBranchStatistics($branch);
                 $authors = $repository->getAuthorStatistics($branch);
 
                 return $app['twig']->render('stats.twig', array(
-                    'repo'           => $repo,
-                    'branch'         => $branch,
-                    'branches'       => $repository->getBranches(),
-                    'tags'           => $repository->getTags(),
-                    'stats'          => $stats,
-                    'authors'        => $authors,
+                'repo' => $repo,
+                'branch' => $branch,
+                'branches' => $repository->getBranches(),
+                'tags' => $repository->getTags(),
+                'stats' => $stats,
+                'authors' => $authors,
                 ));
             })->assert('repo', $app['util.routing']->getRepositoryRegex())
               ->assert('branch', $app['util.routing']->getBranchRegex())
@@ -53,7 +52,7 @@ class MainController implements ControllerProviderInterface
               ->convert('branch', 'escaper.argument:escape')
               ->bind('stats');
 
-            $route->get('{repo}/{branch}/rss/', function($repo, $branch) use ($app) {
+        $route->get('{repo}/{branch}/rss/', function ($repo, $branch) use ($app) {
                 $repository = $app['git']->getRepositoryFromName($app['git.repos'], $repo);
 
                 if ($branch === null) {
@@ -63,9 +62,9 @@ class MainController implements ControllerProviderInterface
                 $commits = $repository->getPaginatedCommits($branch);
 
                 $html = $app['twig']->render('rss.twig', array(
-                    'repo'           => $repo,
-                    'branch'         => $branch,
-                    'commits'        => $commits,
+                'repo' => $repo,
+                'branch' => $branch,
+                'commits' => $commits,
                 ));
 
                 return new Response($html, 200, array('Content-Type' => 'application/rss+xml'));

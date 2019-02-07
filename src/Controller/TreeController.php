@@ -2,10 +2,10 @@
 
 namespace GitList\Controller;
 
-use Silex\Application;
 use Silex\ControllerProviderInterface;
-use Symfony\Component\HttpFoundation\Request;
+use Silex\Application;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\Request;
 use GitList\Exception\NoRepositoryException;
 
 class TreeController implements ControllerProviderInterface
@@ -35,15 +35,15 @@ class TreeController implements ControllerProviderInterface
                 }
 
                 return $app['twig']->render('tree.twig', array(
-                    'files'          => $files->output(),
-                    'repo'           => $repo,
-                    'branch'         => $branch,
-                    'path'           => $tree ? $tree . '/' : $tree,
-                    'parent'         => $parent,
-                    'breadcrumbs'    => $breadcrumbs,
-                    'branches'       => $repository->getBranches(),
-                    'tags'           => $repository->getTags(),
-                    'readme'         => $app['util.repository']->getReadme($repository, $branch, $tree ? "$tree" : ""),
+                'files' => $files->output(),
+                'repo' => $repo,
+                'branch' => $branch,
+                'path' => $tree ? $tree . '/' : $tree,
+                'parent' => $parent,
+                'breadcrumbs' => $breadcrumbs,
+                'branches' => $repository->getBranches(),
+                'tags' => $repository->getTags(),
+                'readme' => $app['util.repository']->getReadme($repository, $branch, $tree ? "$tree" : ''),
                 ));
             })->assert('repo', $app['util.routing']->getRepositoryRegex())
               ->assert('commitishPath', $app['util.routing']->getCommitishPathRegex())
@@ -61,21 +61,21 @@ class TreeController implements ControllerProviderInterface
                 $results = $repository->searchTree($query, $branch);
 
                 return $app['twig']->render('search.twig', array(
-                    'results'        => $results,
-                    'repo'           => $repo,
-                    'branch'         => $branch,
-                    'path'           => $tree,
-                    'breadcrumbs'    => $breadcrumbs,
-                    'branches'       => $repository->getBranches(),
-                    'tags'           => $repository->getTags(),
-                    'query'          => $query
+                'results' => $results,
+                'repo' => $repo,
+                'branch' => $branch,
+                'path' => $tree,
+                'breadcrumbs' => $breadcrumbs,
+                'branches' => $repository->getBranches(),
+                'tags' => $repository->getTags(),
+                'query' => $query,
                 ));
             })->assert('repo', $app['util.routing']->getRepositoryRegex())
               ->assert('branch', $app['util.routing']->getBranchRegex())
               ->convert('branch', 'escaper.argument:escape')
               ->bind('search');
 
-            $route->get('{repo}/{format}ball/{branch}', function($repo, $format, $branch) use ($app) {
+        $route->get('{repo}/{format}ball/{branch}', function ($repo, $format, $branch) use ($app) {
                 $repository = $app['git']->getRepositoryFromName($app['git.repos'], $repo);
 
                 $tree = $repository->getBranchTree($branch);
@@ -97,14 +97,15 @@ class TreeController implements ControllerProviderInterface
 
                 /**
                  * Generating name for downloading, lowercasing and removing all non
-                 * ascii and special characters
+             * ascii and special characters.
                  */
-                $filename = strtolower($repo.'_'.$branch);
+            $filename = strtolower($repo . '_' . $branch);
                 $filename = preg_replace('#[^a-z0-9]+#', '_', $filename);
                 $filename = $filename . '.' . $format;
 
                 $response = new BinaryFileResponse($file);
                 $response->setContentDisposition('attachment', $filename);
+
                 return $response;
             })->assert('format', '(zip|tar)')
               ->assert('repo', $app['util.routing']->getRepositoryRegex())
@@ -112,15 +113,14 @@ class TreeController implements ControllerProviderInterface
               ->convert('branch', 'escaper.argument:escape')
               ->bind('archive');
 
-
-            $route->get('{repo}/{branch}/', function($repo, $branch) use ($app, $treeController) {
+        $route->get('{repo}/{branch}/', function ($repo, $branch) use ($app, $treeController) {
                 return $treeController($repo, $branch);
             })->assert('repo', $app['util.routing']->getRepositoryRegex())
               ->assert('branch', $app['util.routing']->getBranchRegex())
               ->convert('branch', 'escaper.argument:escape')
               ->bind('branch');
 
-            $route->get('{repo}/', function($repo) use ($app, $treeController) {
+        $route->get('{repo}/', function ($repo) use ($app, $treeController) {
                 return $treeController($repo);
             })->assert('repo', $app['util.routing']->getRepositoryRegex())
               ->bind('repository');
@@ -130,4 +130,3 @@ class TreeController implements ControllerProviderInterface
         return $route;
     }
 }
-
